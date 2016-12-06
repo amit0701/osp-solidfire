@@ -1,0 +1,42 @@
+# This template configures each role to use a pair of bonded nics (nic2 and
+# nic3) and configures an IP address on each relevant isolated network
+# for each role. This template assumes use of network-isolation.yaml.
+#
+# FIXME: if/when we add functionality to heatclient to include heat
+# environment files we should think about using it here to automatically
+# include network-isolation.yaml.
+resource_registry:
+  OS::TripleO::Compute::Net::SoftwareConfig: /home/stack/osp-solidfire/nic_configs/compute.yaml
+  OS::TripleO::Controller::Net::SoftwareConfig: /home/stack/osp-solidfire/nic_configs/controller.yaml
+
+parameter_defaults:
+  InternalApiNetCidr: 192.168.78.0/24
+  StorageNetCidr: 192.168.86.0/24
+  StorageMgmtNetCidr: 172.16.3.0/24 
+  TenantNetCidr: 192.168.84.0/24
+  ExternalNetCidr: 172.21.121.0/24
+#  GlanceNetCidr: 192.168.81.0/24 
+# CIDR subnet mask length for provisioning network
+  ControlPlaneSubnetCidr: '24'
+  InternalApiAllocationPools:  [{'start': '192.168.78.10', 'end': '192.168.78.200'}]
+  StorageAllocationPools:  [{'start': '192.168.86.150', 'end': '192.168.86.180'}]
+  TenantAllocationPools: [{'start': '192.168.84.10', 'end': '192.168.84.200'}]
+  ExternalAllocationPools: [{'start': '172.21.121.160', 'end': '172.21.121.200'}]
+#  GlanceAllocationPools: [{'start': '192.168.81.160', 'end': '192.168.81.200'}]
+  ExternalInterfaceDefaultRoute: 172.21.121.254
+  ControlPlaneDefaultRoute: 192.168.82.10
+  EC2MetadataIp: 192.168.82.10
+  BootNextHopIp: 192.168.79.254 
+  DnsServers: ["8.8.8.8","8.8.4.4"]
+  ExternalNetworkVlanID: 3377
+  TenantNetworkVlanID: 3384
+  InternalApiNetworkVlanID: 3378
+  StorageNetworkVlanID: 3386
+#  GlanceNetworkVlanID: 3381
+  # This sets 'external_network_bridge' in l3_agent.ini to an empty string
+  # so that external networks act like provider bridge networks (they
+  # will plug into br-int instead of br-ex)
+  NeutronExternalNetworkBridge: "''"
+  #Customize bonding options if required
+  BondInterfaceOvsOptions: "bond_mode=balance-slb"
+

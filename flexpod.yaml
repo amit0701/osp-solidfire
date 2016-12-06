@@ -1,0 +1,45 @@
+## A Heat environment file which can be used to set up storage
+## backends. Defaults to Ceph used as a backend for Cinder, Glance and
+## Nova ephemeral storage.
+
+parameter_defaults:
+
+  #### BACKEND SELECTION ####
+
+  ## Whether to enable iscsi backend for Cinder.
+  CinderEnableIscsiBackend: false
+  ## Whether to enable rbd (Ceph) backend for Cinder.
+  CinderEnableRbdBackend: false
+  ## Whether to enable NFS backend for Cinder.
+  # CinderEnableNfsBackend: false
+  ## Whether to enable rbd (Ceph) backend for Nova ephemeral storage.
+  NovaEnableRbdBackend: false
+  ## Glance backend can be either 'rbd' (Ceph), 'swift' or 'file'.
+  GlanceBackend: file
+
+  #### GLANCE FILE BACKEND PACEMAKER SETTINGS (used for mounting NFS) ####
+
+  ## Whether to make Glance 'file' backend a mount managed by Pacemaker
+  GlanceFilePcmkManage: true
+  ## File system type of the mount
+  GlanceFilePcmkFstype: nfs
+  ## Pacemaker mount point, e.g. '192.168.122.1:/export/glance' for NFS
+  GlanceFilePcmkDevice: '192.168.80.201:/glance'
+  ## Options for the mount managed by Pacemaker
+  GlanceFilePcmkOptions: 'context=system_u:object_r:glance_var_lib_t:s0'
+
+  ## Enables SolidFire backend
+  ExtraConfig:
+      cinder::config::cinder_config:
+          solidfire/volume_driver:
+              value: cinder.volume.drivers.solidfire.SolidFireDriver
+          solidfire/san_ip:
+              value: 172.21.121.100
+          solidfire/san_login:
+              value: admin
+          solidfire/san_password:
+              value: Netapp!23
+          solidfire/sf_svip:
+              value: 192.168.86.100:3260
+      cinder_user_enabled_backends: ['solidfire']
+
